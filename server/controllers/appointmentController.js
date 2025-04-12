@@ -1,6 +1,5 @@
-const Appointment = require("../models/appointmentModel");
-const Notification = require("../models/notificationModel");
-const User = require("../models/userModel");
+const mongoose = require("mongoose");
+const { Appointment, Doctor, User, Notification } = require('../models');
 
 const getallappointments = async (req, res) => {
   try {
@@ -87,8 +86,55 @@ const completed = async (req, res) => {
   }
 };
 
+const getUserAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({ userId: req.locals })
+      .populate({
+        path: 'doctorId',
+        model: Doctor,
+        populate: {
+          path: 'userId',
+          model: User,
+          select: 'firstname lastname'
+        }
+      })
+      .lean();
+
+    return res.status(200).json(appointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    return res.status(500).send('Unable to get appointments');
+  }
+};
+
+const cancelAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.appointmentId,
+      { status: 'cancelled' },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).send("Appointment not found");
+    }
+
+    const usernotification = await Notification({
+      userId: req.locals,
+      content: `Your appointment has been cancelled`,
+    }).save();
+
+    return res.status(200).json(appointment);
+  } catch (error) {
+    console.error("Error cancelling appointment:", error);
+    return res.status(500).send("Error cancelling appointment");
+  }
+};
+
 module.exports = {
   getallappointments,
   bookappointment,
   completed,
+  getUserAppointments,
+  cancelAppointment,
 };

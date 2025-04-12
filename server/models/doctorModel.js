@@ -19,6 +19,16 @@ const schema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    longitude: {
+      type: Number,
+      required: false,
+      default: null
+    },
+    latitude: {
+      type: Number,
+      required: false,
+      default: null
+    },
     isDoctor: {
       type: Boolean,
       default: false,

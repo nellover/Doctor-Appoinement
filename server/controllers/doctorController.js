@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Doctor = require("../models/doctorModel");
 const User = require("../models/userModel");
 const Notification = require("../models/notificationModel");
@@ -5,19 +6,19 @@ const Appointment = require("../models/appointmentModel");
 
 const getalldoctors = async (req, res) => {
   try {
-    let docs;
-    if (!req.locals) {
-      docs = await Doctor.find({ isDoctor: true }).populate("userId");
-    } else {
-      docs = await Doctor.find({ isDoctor: true })
-        .find({
-          _id: { $ne: req.locals },
-        })
-        .populate("userId");
-    }
+    console.log("Fetching all doctors");
+    const doctors = await Doctor.find({ isDoctor: true })
+      .populate({
+        path: 'userId',
+        model: 'users',
+        select: 'firstname lastname email'
+      })
+      .exec();
 
-    return res.send(docs);
+    console.log("Found doctors count:", doctors.length);
+    return res.status(200).json(doctors);
   } catch (error) {
+    console.error("Error fetching doctors:", error);
     res.status(500).send("Unable to get doctors");
   }
 };
@@ -43,7 +44,14 @@ const applyfordoctor = async (req, res) => {
       return res.status(400).send("Application already exists");
     }
 
-    const doctor = Doctor({ ...req.body.formDetails, userId: req.locals });
+    const doctorData = {
+      ...req.body.formDetails,
+      userId: req.locals,
+      longitude: req.body.formDetails.longitude || null,
+      latitude: req.body.formDetails.latitude || null
+    };
+
+    const doctor = Doctor(doctorData);
     const result = await doctor.save();
 
     return res.status(201).send("Application submitted successfully");
@@ -116,6 +124,70 @@ const deletedoctor = async (req, res) => {
   }
 };
 
+const getDoctor = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.params.userId });
+    if (!doctor) {
+      return res.status(404).send("Doctor not found");
+    }
+    return res.status(200).json(doctor);
+  } catch (error) {
+    return res.status(500).send("Error fetching doctor data");
+  }
+};
+
+const updateLocation = async (req, res) => {
+  try {
+    const { longitude, latitude } = req.body;
+    console.log('Updating location for userId:', req.locals);
+    console.log('Location data:', { longitude, latitude });
+
+    // First check if doctor exists
+    let doctor = await Doctor.findOne({ userId: req.locals });
+    
+    if (!doctor) {
+      // Create new doctor record if doesn't exist
+      console.log('Creating new doctor record for userId:', req.locals);
+      doctor = new Doctor({
+        userId: req.locals,
+        specialization: "Not specified",
+        experience: 0,
+        fees: 0,
+        isDoctor: true,
+        longitude: longitude,
+        latitude: latitude
+      });
+      await doctor.save();
+      console.log('New doctor record created:', doctor);
+    } else {
+      // Update existing doctor record
+      doctor.longitude = longitude;
+      doctor.latitude = latitude;
+      await doctor.save();
+      console.log('Updated existing doctor record:', doctor);
+    }
+
+    return res.status(200).json(doctor);
+  } catch (error) {
+    console.error("Error updating location:", error);
+    return res.status(500).send(`Error updating location: ${error.message}`);
+  }
+};
+
+const getDoctorAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({ 
+      doctorId: req.params.doctorId,
+      status: { $ne: 'cancelled' }  // Exclude cancelled appointments
+    }).select('date time status');
+
+    return res.status(200).json(appointments);
+  } catch (error) {
+    console.error('Error fetching doctor appointments:', error);
+    return res.status(500).send('Error fetching appointments');
+  }
+};
+
 module.exports = {
   getalldoctors,
   getnotdoctors,
@@ -123,4 +195,7 @@ module.exports = {
   applyfordoctor,
   acceptdoctor,
   rejectdoctor,
+  getDoctor,
+  updateLocation,
+  getDoctorAppointments,
 };

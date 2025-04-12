@@ -17,7 +17,9 @@ function Register() {
     email: "",
     password: "",
     confpassword: "",
-    role: "", 
+    role: "",
+    longitude: "",
+    latitude: "", 
   });
   const navigate = useNavigate();
 
@@ -59,7 +61,7 @@ function Register() {
   
       if (loading) return;
       if (file === "") return;
-      const { firstname, lastname, email, password, confpassword } = formDetails;
+      const { firstname, lastname, email, password, confpassword, longitude, latitude } = formDetails;
       if (!firstname || !lastname || !email || !password || !confpassword || !selectedRole) {
         return toast.error("Input field should not be empty");
       } else if (firstname.length < 3) {
@@ -80,6 +82,8 @@ function Register() {
           password,
           pic: file,
           role: selectedRole,
+          longitude: selectedRole === "Doctor" ? parseFloat(longitude) : null,
+          latitude: selectedRole === "Doctor" ? parseFloat(latitude) : null
         }),
         {
           pending: "Registering user...",
@@ -158,6 +162,29 @@ function Register() {
               <option value="Doctor">Doctor</option>
               <option value="Patient">Patient</option>
             </select>
+
+            {selectedRole === "Doctor" && (
+              <div className="form-same-row">
+                <input
+                  type="number"
+                  name="longitude"
+                  className="form-input"
+                  placeholder="Enter longitude"
+                  value={formDetails.longitude}
+                  onChange={inputChange}
+                  step="any"
+                />
+                <input
+                  type="number"
+                  name="latitude" 
+                  className="form-input"
+                  placeholder="Enter latitude"
+                  value={formDetails.latitude}
+                  onChange={inputChange}
+                  step="any"
+                />
+              </div>
+            )}
 
             <button
               type="submit"

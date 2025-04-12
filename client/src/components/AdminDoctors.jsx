@@ -129,6 +129,7 @@ const AdminDoctors = () => {
                     <th>Experience</th>
                     <th>Specialization</th>
                     <th>Fees</th>
+                    <th>Location</th>
                     <th>Remove</th>
                   </tr>
                 </thead>
@@ -151,6 +152,11 @@ const AdminDoctors = () => {
                         <td>{ele?.experience}</td>
                         <td>{ele?.specialization}</td>
                         <td>{ele?.fees}</td>
+                        <td>
+                          {ele?.longitude && ele?.latitude 
+                            ? `${ele.longitude.toFixed(6)}, ${ele.latitude.toFixed(6)}`
+                            : 'Not provided'}
+                        </td>
                         <td className="select">
                           <button
                             className="btn user-btn"

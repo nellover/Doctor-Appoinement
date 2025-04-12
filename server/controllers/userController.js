@@ -209,6 +209,21 @@ const resetpassword = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    console.log("Getting user with ID:", req.locals);
+    const user = await User.findById(req.locals);
+    
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Error in getUser:", error);
+    return res.status(500).send("Error getting user data");
+  }
+};
 
 module.exports = {
   getuser,
@@ -220,4 +235,5 @@ module.exports = {
   changepassword,
   forgotpassword,
   resetpassword,
+  getUser,
 };

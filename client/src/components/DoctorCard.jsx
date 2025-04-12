@@ -43,6 +43,15 @@ const DoctorCard = ({ ele }) => {
         <strong>Phone: </strong>
         {ele?.userId?.mobile}
       </p>
+      <div className="doctor-info">
+        <h4>{ele?.userId?.firstname + " " + ele?.userId?.lastname}</h4>
+        <p>Specialization: {ele?.specialization}</p>
+        <p>Experience: {ele?.experience} years</p>
+        <p>Fees: ₹{ele?.fees}</p>
+        {ele?.longitude && ele?.latitude && (
+          <p>Location: {ele?.longitude.toFixed(6)}, {ele?.latitude.toFixed(6)}</p>
+        )}
+      </div>
       <button
         className="btn appointment-btn"
         onClick={handleModal}

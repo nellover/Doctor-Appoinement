@@ -14,6 +14,8 @@ const ApplyDoctor = () => {
     specialization: "",
     experience: "",
     fees: "",
+    longitude: "",
+    latitude: ""
   });
 
   const inputChange = (e) => {
@@ -85,6 +87,24 @@ const ApplyDoctor = () => {
               placeholder="Enter your fees  (in dollars)"
               value={formDetails.fees}
               onChange={inputChange}
+            />
+            <input
+              type="number"
+              name="longitude"
+              className="form-input"
+              placeholder="Longitude (optional)"
+              value={formDetails.longitude}
+              onChange={inputChange}
+              step="any"
+            />
+            <input
+              type="number" 
+              name="latitude"
+              className="form-input"
+              placeholder="Latitude (optional)"
+              value={formDetails.latitude}
+              onChange={inputChange}
+              step="any"
             />
             <button
               type="submit"

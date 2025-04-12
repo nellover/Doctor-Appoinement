@@ -1,21 +1,12 @@
 const express = require("express");
-const auth = require("../middleware/auth");
 const appointmentController = require("../controllers/appointmentController");
+const auth = require("../middleware/auth");
 
 const appointRouter = express.Router();
 
-appointRouter.get(
-  "/getallappointments",
-  auth,
-  appointmentController.getallappointments
-);
-
-appointRouter.post(
-  "/bookappointment",
-  auth,
-  appointmentController.bookappointment
-);
-
-appointRouter.put("/completed", auth, appointmentController.completed);
+appointRouter.post("/bookappointment", auth, appointmentController.bookappointment);
+appointRouter.get("/user-appointments", auth, appointmentController.getUserAppointments);
+appointRouter.put("/cancel/:appointmentId", auth, appointmentController.cancelAppointment);
+appointRouter.put("/complete", auth, appointmentController.completed);
 
 module.exports = appointRouter;

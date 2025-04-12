@@ -27,22 +27,40 @@ function Profile() {
     address: "",
     password: "",
     confpassword: "",
+    longitude: "",
+    latitude: ""
   });
 
   const getUser = async () => {
     try {
       dispatch(setLoading(true));
       const temp = await fetchData(`/user/getuser/${userId}`);
+      
+      let doctorData = null;
+      if (temp.role === "Doctor") {
+        try {
+          doctorData = await fetchData(`/doctor/getdoctor/${userId}`);
+        } catch (err) {
+          console.log("Error fetching doctor data:", err);
+        }
+      }
+      
       setFormDetails({
         ...temp,
         password: "",
         confpassword: "",
         mobile: temp.mobile === null ? "" : temp.mobile,
         age: temp.age === null ? "" : temp.age,
+        longitude: doctorData?.longitude ?? "",
+        latitude: doctorData?.latitude ?? ""
       });
       setFile(temp.pic);
       dispatch(setLoading(false));
-    } catch (error) {}
+    } catch (error) {
+      console.log("Error fetching user data:", error);
+      dispatch(setLoading(false));
+      toast.error("Error loading profile data");
+    }
   };
 
   useEffect(() => {
@@ -57,6 +75,34 @@ function Profile() {
     });
   };
 
+  const updateLocation = async (e) => {
+    e.preventDefault();
+    try {
+      const { longitude, latitude } = formDetails;
+      await toast.promise(
+        axios.put(
+          "/doctor/updatelocation",
+          {
+            longitude: parseFloat(longitude),
+            latitude: parseFloat(latitude)
+          },
+          {
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        ),
+        {
+          pending: "Updating location...",
+          success: "Location updated successfully",
+          error: "Unable to update location",
+        }
+      );
+    } catch (error) {
+      toast.error("Unable to update location");
+    }
+  };
+
   const formSubmit = async (e) => {
     try {
       e.preventDefault();
@@ -68,8 +114,6 @@ function Profile() {
         mobile,
         address,
         gender,
-        password,
-        confpassword,
       } = formDetails;
 
       if (!email) {
@@ -78,24 +122,22 @@ function Profile() {
         return toast.error("First name must be at least 3 characters long");
       } else if (lastname.length < 3) {
         return toast.error("Last name must be at least 3 characters long");
-      } else if (password.length < 5) {
-        return toast.error("Password must be at least 5 characters long");
-      } else if (password !== confpassword) {
-        return toast.error("Passwords do not match");
       }
+
+      const updateData = {
+        firstname,
+        lastname,
+        age,
+        mobile,
+        address,
+        gender,
+        email
+      };
+
       await toast.promise(
         axios.put(
           "/user/updateprofile",
-          {
-            firstname,
-            lastname,
-            age,
-            mobile,
-            address,
-            gender,
-            email,
-            password,
-          },
+          updateData,
           {
             headers: {
               authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -106,34 +148,26 @@ function Profile() {
           pending: "Updating profile...",
           success: "Profile updated successfully",
           error: "Unable to update profile",
-          loading: "Updating profile...",
         }
       );
-
-      setFormDetails({ ...formDetails, password: "", confpassword: "" });
     } catch (error) {
-      return toast.error("Unable to update profile");
+      toast.error("Unable to update profile");
     }
   };
 
   return (
     <>
-    <Navbar />
+      <Navbar />
       {loading ? (
         <Loading />
       ) : (
         <section className="register-section flex-center">
           <div className="profile-container flex-center">
             <h2 className="form-heading">Profile</h2>
-            <img
-              src={file}
-              alt="profile"
-              className="profile-pic"
-            />
-            <form
-              onSubmit={formSubmit}
-              className="register-form"
-            >
+            <img src={file} alt="profile" className="profile-pic" />
+            
+            {/* Main profile form */}
+            <form onSubmit={formSubmit} className="register-form">
               <div className="form-same-row">
                 <input
                   type="text"
@@ -225,6 +259,36 @@ function Profile() {
                 update
               </button>
             </form>
+
+            {/* Separate location form for doctors */}
+            {formDetails.role === "Doctor" && (
+              <form onSubmit={updateLocation} className="register-form location-form">
+                <h3>Update Location</h3>
+                <div className="form-same-row">
+                  <input
+                    type="number"
+                    name="longitude"
+                    className="form-input"
+                    placeholder="Enter longitude"
+                    value={formDetails.longitude}
+                    onChange={inputChange}
+                    step="any"
+                  />
+                  <input
+                    type="number"
+                    name="latitude"
+                    className="form-input"
+                    placeholder="Enter latitude"
+                    value={formDetails.latitude}
+                    onChange={inputChange}
+                    step="any"
+                  />
+                </div>
+                <button type="submit" className="btn form-btn">
+                  Update Location
+                </button>
+              </form>
+            )}
           </div>
         </section>
       )}
