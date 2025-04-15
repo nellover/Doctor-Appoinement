@@ -188,6 +188,26 @@ const getDoctorAppointments = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { openTime, closeTime } = req.body;
+    const doctor = await Doctor.findOneAndUpdate(
+      { userId: req.locals },
+      { openTime, closeTime },
+      { new: true }
+    );
+    
+    if (!doctor) {
+      return res.status(404).send("Doctor not found");
+    }
+
+    return res.status(200).json(doctor);
+  } catch (error) {
+    console.error("Error updating doctor profile:", error);
+    return res.status(500).send("Error updating profile");
+  }
+};
+
 module.exports = {
   getalldoctors,
   getnotdoctors,
@@ -198,4 +218,5 @@ module.exports = {
   getDoctor,
   updateLocation,
   getDoctorAppointments,
+  updateProfile,
 };

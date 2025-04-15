@@ -130,6 +130,7 @@ const AdminDoctors = () => {
                     <th>Specialization</th>
                     <th>Fees</th>
                     <th>Location</th>
+                    <th>Hours</th>
                     <th>Remove</th>
                   </tr>
                 </thead>
@@ -157,6 +158,7 @@ const AdminDoctors = () => {
                             ? `${ele.longitude.toFixed(6)}, ${ele.latitude.toFixed(6)}`
                             : 'Not provided'}
                         </td>
+                        <td>{ele?.openTime} - {ele?.closeTime}</td>
                         <td className="select">
                           <button
                             className="btn user-btn"

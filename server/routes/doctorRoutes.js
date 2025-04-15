@@ -18,6 +18,8 @@ doctorRouter.put("/acceptdoctor", auth, doctorController.acceptdoctor);
 
 doctorRouter.put("/rejectdoctor", auth, doctorController.rejectdoctor);
 
+doctorRouter.put("/update-profile", auth, doctorController.updateProfile);
+
 /**
  * @swagger
  * components:

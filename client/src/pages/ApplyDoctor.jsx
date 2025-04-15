@@ -15,7 +15,9 @@ const ApplyDoctor = () => {
     experience: "",
     fees: "",
     longitude: "",
-    latitude: ""
+    latitude: "",
+    openTime: "",
+    closeTime: "",
   });
 
   const inputChange = (e) => {
@@ -105,6 +107,22 @@ const ApplyDoctor = () => {
               value={formDetails.latitude}
               onChange={inputChange}
               step="any"
+            />
+            <input
+              type="time"
+              name="openTime"
+              className="form-input"
+              value={formDetails.openTime}
+              onChange={inputChange}
+              required
+            />
+            <input
+              type="time"
+              name="closeTime"
+              className="form-input"
+              value={formDetails.closeTime}
+              onChange={inputChange}
+              required
             />
             <button
               type="submit"

@@ -51,6 +51,9 @@ const DoctorCard = ({ ele }) => {
         {ele?.longitude && ele?.latitude && (
           <p>Location: {ele?.longitude.toFixed(6)}, {ele?.latitude.toFixed(6)}</p>
         )}
+        {ele?.openTime && ele?.closeTime && (
+          <p>Hours: {ele.openTime} - {ele.closeTime}</p>
+        )}
       </div>
       <button
         className="btn appointment-btn"

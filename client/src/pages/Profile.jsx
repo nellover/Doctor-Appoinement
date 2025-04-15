@@ -28,7 +28,9 @@ function Profile() {
     password: "",
     confpassword: "",
     longitude: "",
-    latitude: ""
+    latitude: "",
+    openTime: "",
+    closeTime: "",
   });
 
   const getUser = async () => {
@@ -52,7 +54,9 @@ function Profile() {
         mobile: temp.mobile === null ? "" : temp.mobile,
         age: temp.age === null ? "" : temp.age,
         longitude: doctorData?.longitude ?? "",
-        latitude: doctorData?.latitude ?? ""
+        latitude: doctorData?.latitude ?? "",
+        openTime: doctorData?.openTime ?? "",
+        closeTime: doctorData?.closeTime ?? "",
       });
       setFile(temp.pic);
       dispatch(setLoading(false));
@@ -100,6 +104,33 @@ function Profile() {
       );
     } catch (error) {
       toast.error("Unable to update location");
+    }
+  };
+
+  const updateHours = async (e) => {
+    e.preventDefault();
+    try {
+      await toast.promise(
+        axios.put(
+          "/doctor/update-profile",
+          {
+            openTime: formDetails.openTime,
+            closeTime: formDetails.closeTime
+          },
+          {
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        ),
+        {
+          pending: "Updating working hours...",
+          success: "Working hours updated successfully",
+          error: "Unable to update working hours",
+        }
+      );
+    } catch (error) {
+      toast.error("Unable to update working hours");
     }
   };
 
@@ -156,12 +187,12 @@ function Profile() {
   };
 
   return (
-    <>
+    <div className="profile-page">
       <Navbar />
       {loading ? (
         <Loading />
       ) : (
-        <section className="register-section flex-center">
+        <section className="profile-section flex-center">
           <div className="profile-container flex-center">
             <h2 className="form-heading">Profile</h2>
             <img src={file} alt="profile" className="profile-pic" />
@@ -289,11 +320,45 @@ function Profile() {
                 </button>
               </form>
             )}
+
+            {/* Add working hours form for doctors */}
+            {formDetails.role === "Doctor" && (
+              <form onSubmit={updateHours} className="register-form hours-form">
+                <h3>Update Working Hours</h3>
+                <div className="form-same-row">
+                  <div className="form-group">
+                    <label>Opening Time:</label>
+                    <input
+                      type="time"
+                      name="openTime"
+                      className="form-input"
+                      value={formDetails.openTime}
+                      onChange={inputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Closing Time:</label>
+                    <input
+                      type="time"
+                      name="closeTime"
+                      className="form-input"
+                      value={formDetails.closeTime}
+                      onChange={inputChange}
+                      required
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="btn form-btn">
+                  Update Hours
+                </button>
+              </form>
+            )}
           </div>
         </section>
       )}
       <Footer />
-    </>
+    </div>
   );
 }
 

@@ -33,6 +33,16 @@ const schema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    openTime: {
+      type: String,
+      required: true,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/  // HH:mm format validation
+    },
+    closeTime: {
+      type: String,
+      required: true,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/  // HH:mm format validation
+    },
   },
   {
     timestamps: true,
